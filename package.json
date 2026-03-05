@@ -1,0 +1,59 @@
+{
+  "name": "napmap-ufe",
+  "version": "0.0.1",
+  "description": "NAPMap - Micro-frontend for alternative fuel stations registry",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "collection": "dist/collection/collection-manifest.json",
+  "collection:main": "dist/collection/index.js",
+  "unpkg": "dist/napmap-ufe/napmap-ufe.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/napmap-ufe/napmap-ufe.esm.js",
+      "require": "./dist/napmap-ufe/napmap-ufe.cjs.js"
+    },
+    "./loader": {
+      "import": "./loader/index.js",
+      "require": "./loader/index.cjs",
+      "types": "./loader/index.d.ts"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Marosko123/napmap.git"
+  },
+  "files": [
+    "dist/",
+    "loader/"
+  ],
+  "scripts": {
+    "convert-openapi": "js-yaml ./api/napmap.openapi.yaml > .openapi.json",
+    "mock-api": "open-api-mocker --schema .openapi.json --port 5001",
+    "start:app": "stencil build --dev --watch --serve",
+    "start:mock": "run-s convert-openapi mock-api",
+    "start": "run-p -r start:mock start:app",
+    "build": "stencil build",
+    "test": "stencil-test",
+    "test:watch": "stencil-test --watch",
+    "generate": "stencil generate",
+    "openapi": "openapi-generator-cli generate"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.30.2",
+    "@stencil/core": "^4.27.1 || ^5.0.0-0",
+    "@stencil/vitest": "^1.8.3",
+    "@types/node": "^22.13.5",
+    "@vitest/browser-playwright": "^4.0.0",
+    "js-yaml": "^4.1.1",
+    "npm-run-all": "^4.1.5",
+    "open-api-mocker": "^2.0.0",
+    "playwright": "^1.52.0",
+    "vitest": "^4.0.0"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@material/web": "^2.4.1",
+    "axios": "^1.13.6"
+  }
+}

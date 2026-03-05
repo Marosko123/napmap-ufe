@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  position: relative;
+  min-height: 100%;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--md-sys-color-surface-container-low, #f5f5f5);
+}
+
+.filters md-filled-text-field,
+.filters md-filled-select {
+  flex: 1;
+  min-width: 150px;
+}
+
+.error {
+  color: var(--md-sys-color-error, #b00020);
+  padding: 1rem;
+  text-align: center;
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant, #666);
+}
+
+md-list {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+md-list-item {
+  cursor: pointer;
+}
+
+md-list-item:hover {
+  background-color: var(--md-sys-color-surface-container-highest, #e0e0e0);
+}
+
+.add-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  --md-filled-icon-button-container-color: var(--md-sys-color-primary, #6200ee);
+  --md-filled-icon-button-icon-color: var(--md-sys-color-on-primary, #fff);
+}
