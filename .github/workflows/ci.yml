@@ -22,18 +22,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-          cache-dependency-path: napmap-ufe/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./napmap-ufe
         run: npm ci
 
       - name: Build
-        working-directory: ./napmap-ufe
         run: npm run build --if-present
 
       - name: Test
-        working-directory: ./napmap-ufe
         run: npm test
 
       - name: Set up QEMU
@@ -68,9 +64,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./napmap-ufe
+          context: .
           platforms: linux/amd64,linux/arm64/v8
-          file: ./napmap-ufe/build/docker/Dockerfile
+          file: ./build/docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
