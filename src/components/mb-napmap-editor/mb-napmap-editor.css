@@ -74,3 +74,21 @@ md-divider {
   --md-filled-tonal-button-container-color: var(--md-sys-color-error-container, #ffdad6);
   --md-filled-tonal-button-label-text-color: var(--md-sys-color-on-error-container, #410002);
 }
+
+.chip-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface-variant, #666);
+}
+
+.chip-group md-chip-set {
+  --md-filter-chip-container-shape: 8px;
+}

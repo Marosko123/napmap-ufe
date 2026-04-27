@@ -1,6 +1,18 @@
 import { Component, Host, Prop, State, h, EventEmitter, Event } from '@stencil/core';
 import { StationsApiFactory, Station } from '../../api/napmap';
 
+const FUEL_OPTIONS: ReadonlyArray<{ value: Station["fuels"][number]; label: string }> = [
+  { value: "ELECTRIC", label: "Elektrina" },
+  { value: "HYDROGEN", label: "Vodík" },
+  { value: "CNG", label: "CNG" },
+  { value: "LNG", label: "LNG" },
+  { value: "LPG", label: "LPG" },
+];
+
+const CONNECTOR_OPTIONS = [
+  "CCS2", "Type2", "CHAdeMO", "Tesla", "GB/T", "H2-700bar", "H2-350bar"
+];
+
 @Component({
   tag: 'mb-napmap-editor',
   styleUrl: 'mb-napmap-editor.css',
@@ -78,15 +90,36 @@ export class MbNapmapEditor {
 
   private handleInputEvent(ev: InputEvent): string {
     const target = ev.target as HTMLInputElement;
-    this.isValid = true;
+    this.recomputeValidity();
+    return target.value;
+  }
+
+  private recomputeValidity() {
+    if (!this.formElement || !this.station) { this.isValid = false; return; }
+    let valid = true;
     for (let i = 0; i < this.formElement.children.length; i++) {
       const element = this.formElement.children[i];
       if ("reportValidity" in element) {
-        const valid = (element as HTMLInputElement).reportValidity();
-        this.isValid &&= valid;
+        valid = valid && (element as HTMLInputElement).reportValidity();
       }
     }
-    return target.value;
+    valid = valid && (this.station.fuels?.length ?? 0) >= 1;
+    this.isValid = valid;
+  }
+
+  private toggleFuel(value: Station["fuels"][number]) {
+    if (!this.station) return;
+    const set = new Set(this.station.fuels ?? []);
+    if (set.has(value)) { set.delete(value); } else { set.add(value); }
+    this.station = { ...this.station, fuels: Array.from(set) as Station["fuels"] };
+    this.recomputeValidity();
+  }
+
+  private toggleConnector(value: string) {
+    if (!this.station) return;
+    const set = new Set(this.station.connectors ?? []);
+    if (set.has(value)) { set.delete(value); } else { set.add(value); }
+    this.station = { ...this.station, connectors: Array.from(set) };
   }
 
   private async updateStation() {
@@ -149,6 +182,9 @@ export class MbNapmapEditor {
           <md-filled-text-field
             label="Názov stanice"
             required
+            minlength={3}
+            maxlength={80}
+            error-text="Zadajte 3 až 80 znakov"
             value={this.station?.name}
             oninput={(ev: InputEvent) => {
               if (this.station) { this.station.name = this.handleInputEvent(ev); }
@@ -173,31 +209,22 @@ export class MbNapmapEditor {
             </md-select-option>
           </md-filled-select>
 
-          <md-filled-select
-            label="Typ paliva"
-            value={this.station?.fuels?.[0]}
-            oninput={(ev: InputEvent) => {
-              if (this.station) {
-                this.station.fuels = [this.handleInputEvent(ev)] as any;
-              }
-            }}>
-            <md-icon slot="leading-icon">local_gas_station</md-icon>
-            <md-select-option value="ELECTRIC">
-              <div slot="headline">Elektrická energia</div>
-            </md-select-option>
-            <md-select-option value="HYDROGEN">
-              <div slot="headline">Vodík</div>
-            </md-select-option>
-            <md-select-option value="CNG">
-              <div slot="headline">CNG</div>
-            </md-select-option>
-            <md-select-option value="LNG">
-              <div slot="headline">LNG</div>
-            </md-select-option>
-            <md-select-option value="LPG">
-              <div slot="headline">LPG</div>
-            </md-select-option>
-          </md-filled-select>
+          <div class="chip-group">
+            <span class="chip-label">
+              <md-icon>local_gas_station</md-icon>
+              Palivá (vyberte aspoň jedno)
+            </span>
+            <md-chip-set>
+              {FUEL_OPTIONS.map(opt => (
+                <md-filter-chip
+                  key={opt.value}
+                  label={opt.label}
+                  selected={this.station?.fuels?.includes(opt.value)}
+                  onClick={() => this.toggleFuel(opt.value)}>
+                </md-filter-chip>
+              ))}
+            </md-chip-set>
+          </div>
 
           <md-filled-text-field
             label="Prevádzkovateľ"
@@ -234,7 +261,10 @@ export class MbNapmapEditor {
               label="GPS šírka (lat)"
               type="number"
               step="0.0001"
+              min={-90}
+              max={90}
               required
+              error-text="Hodnota -90 až 90"
               value={this.station?.lat?.toString()}
               oninput={(ev: InputEvent) => {
                 if (this.station) { this.station.lat = parseFloat(this.handleInputEvent(ev)); }
@@ -246,7 +276,10 @@ export class MbNapmapEditor {
               label="GPS dĺžka (lng)"
               type="number"
               step="0.0001"
+              min={-180}
+              max={180}
               required
+              error-text="Hodnota -180 až 180"
               value={this.station?.lng?.toString()}
               oninput={(ev: InputEvent) => {
                 if (this.station) { this.station.lng = parseFloat(this.handleInputEvent(ev)); }
@@ -281,17 +314,22 @@ export class MbNapmapEditor {
             </md-slider>
           </div>
 
-          <md-filled-text-field
-            label="Konektory (oddelené čiarkou)"
-            value={this.station?.connectors?.join(', ')}
-            oninput={(ev: InputEvent) => {
-              if (this.station) {
-                const value = this.handleInputEvent(ev);
-                this.station.connectors = value ? value.split(',').map(s => s.trim()) : [];
-              }
-            }}>
-            <md-icon slot="leading-icon">power</md-icon>
-          </md-filled-text-field>
+          <div class="chip-group">
+            <span class="chip-label">
+              <md-icon>power</md-icon>
+              Konektory
+            </span>
+            <md-chip-set>
+              {CONNECTOR_OPTIONS.map(opt => (
+                <md-filter-chip
+                  key={opt}
+                  label={opt}
+                  selected={this.station?.connectors?.includes(opt)}
+                  onClick={() => this.toggleConnector(opt)}>
+                </md-filter-chip>
+              ))}
+            </md-chip-set>
+          </div>
 
           <md-filled-text-field
             label="Služby (oddelené čiarkou)"
