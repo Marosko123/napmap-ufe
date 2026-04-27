@@ -1,0 +1,12 @@
+mb-napmap-map {
+  display: block;
+  width: 100%;
+}
+
+mb-napmap-map .map {
+  width: 100%;
+  height: calc(100vh - 220px);
+  min-height: 320px;
+  border-radius: 8px;
+  overflow: hidden;
+}

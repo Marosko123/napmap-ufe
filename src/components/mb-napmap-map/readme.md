@@ -1,4 +1,4 @@
-# mb-napmap-list
+# mb-napmap-map
 
 
 
@@ -7,9 +7,9 @@
 
 ## Properties
 
-| Property  | Attribute  | Description | Type     | Default     |
-| --------- | ---------- | ----------- | -------- | ----------- |
-| `apiBase` | `api-base` |             | `string` | `undefined` |
+| Property   | Attribute | Description | Type        | Default |
+| ---------- | --------- | ----------- | ----------- | ------- |
+| `stations` | --        |             | `Station[]` | `[]`    |
 
 
 ## Events
@@ -23,18 +23,13 @@
 
 ### Used by
 
- - [mb-napmap-app](../mb-napmap-app)
-
-### Depends on
-
-- [mb-napmap-map](../mb-napmap-map)
+ - [mb-napmap-list](../mb-napmap-list)
 
 ### Graph
 ```mermaid
 graph TD;
   mb-napmap-list --> mb-napmap-map
-  mb-napmap-app --> mb-napmap-list
-  style mb-napmap-list fill:#f9f,stroke:#333,stroke-width:4px
+  style mb-napmap-map fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

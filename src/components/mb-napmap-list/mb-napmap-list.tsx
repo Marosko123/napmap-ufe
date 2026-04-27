@@ -16,7 +16,8 @@ export class MbNapmapList {
   @State() filterFuel: string = "";
   @State() filterType: string = "";
 
-  stations: Station[] = [];
+  @State() viewMode: "list" | "map" = "list";
+  @State() stations: Station[] = [];
 
   private async getStationsAsync(): Promise<Station[]> {
     this.isLoading = true;
@@ -130,28 +131,56 @@ export class MbNapmapList {
           </md-filled-select>
         </div>
 
+        <div class="view-toggle">
+          {this.viewMode === 'list'
+            ? <md-filled-tonal-button onclick={() => (this.viewMode = 'list')}>
+                <md-icon slot="icon">list</md-icon>
+                Zoznam
+              </md-filled-tonal-button>
+            : <md-outlined-button onclick={() => (this.viewMode = 'list')}>
+                <md-icon slot="icon">list</md-icon>
+                Zoznam
+              </md-outlined-button>
+          }
+          {this.viewMode === 'map'
+            ? <md-filled-tonal-button onclick={() => (this.viewMode = 'map')}>
+                <md-icon slot="icon">map</md-icon>
+                Mapa
+              </md-filled-tonal-button>
+            : <md-outlined-button onclick={() => (this.viewMode = 'map')}>
+                <md-icon slot="icon">map</md-icon>
+                Mapa
+              </md-outlined-button>
+          }
+        </div>
+
         {this.errorMessage
           ? <div class="error">{this.errorMessage}</div>
           : this.isLoading
             ? <div class="loading">Načítavam...</div>
-            : <md-list>
-                {this.stations.length === 0
-                  ? <md-list-item>
-                      <div slot="headline">Žiadne stanice</div>
-                      <div slot="supporting-text">Neboli nájdené žiadne stanice podľa zadaných filtrov</div>
-                    </md-list-item>
-                  : this.stations.map((station) =>
-                      <md-list-item onClick={() => this.stationClicked.emit(station.id)}>
-                        <div slot="headline">{station.name}</div>
-                        <div slot="supporting-text">
-                          {station.address}, {station.city} • {this.formatFuels(station.fuels)}
-                          {station.maxPowerKw ? ` • ${station.maxPowerKw} kW` : ''}
-                        </div>
-                        <md-icon slot="start">{this.getFuelIcon(station.fuels)}</md-icon>
+            : this.viewMode === 'map'
+              ? <mb-napmap-map
+                  stations={this.stations}
+                  onStation-clicked={(ev: CustomEvent<string>) => this.stationClicked.emit(ev.detail)}>
+                </mb-napmap-map>
+              : <md-list>
+                  {this.stations.length === 0
+                    ? <md-list-item>
+                        <div slot="headline">Žiadne stanice</div>
+                        <div slot="supporting-text">Neboli nájdené žiadne stanice podľa zadaných filtrov</div>
                       </md-list-item>
-                    )
-                }
-              </md-list>
+                    : this.stations.map((station) =>
+                        <md-list-item onClick={() => this.stationClicked.emit(station.id)}>
+                          <div slot="headline">{station.name}</div>
+                          <div slot="supporting-text">
+                            {station.address}, {station.city} • {this.formatFuels(station.fuels)}
+                            {station.maxPowerKw ? ` • ${station.maxPowerKw} kW` : ''}
+                          </div>
+                          <md-icon slot="start">{this.getFuelIcon(station.fuels)}</md-icon>
+                        </md-list-item>
+                      )
+                  }
+                </md-list>
         }
 
         <md-filled-icon-button class="add-button"

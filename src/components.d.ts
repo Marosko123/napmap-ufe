@@ -5,6 +5,8 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
+import { Station } from "./api/napmap";
+export { Station } from "./api/napmap";
 export namespace Components {
     interface MbNapmapApp {
         "apiBase": string;
@@ -20,6 +22,12 @@ export namespace Components {
     interface MbNapmapList {
         "apiBase": string;
     }
+    interface MbNapmapMap {
+        /**
+          * @default []
+         */
+        "stations": Station[];
+    }
 }
 export interface MbNapmapEditorCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -28,6 +36,10 @@ export interface MbNapmapEditorCustomEvent<T> extends CustomEvent<T> {
 export interface MbNapmapListCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLMbNapmapListElement;
+}
+export interface MbNapmapMapCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLMbNapmapMapElement;
 }
 declare global {
     interface HTMLMbNapmapAppElement extends Components.MbNapmapApp, HTMLStencilElement {
@@ -70,10 +82,28 @@ declare global {
         prototype: HTMLMbNapmapListElement;
         new (): HTMLMbNapmapListElement;
     };
+    interface HTMLMbNapmapMapElementEventMap {
+        "station-clicked": string;
+    }
+    interface HTMLMbNapmapMapElement extends Components.MbNapmapMap, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLMbNapmapMapElementEventMap>(type: K, listener: (this: HTMLMbNapmapMapElement, ev: MbNapmapMapCustomEvent<HTMLMbNapmapMapElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLMbNapmapMapElementEventMap>(type: K, listener: (this: HTMLMbNapmapMapElement, ev: MbNapmapMapCustomEvent<HTMLMbNapmapMapElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLMbNapmapMapElement: {
+        prototype: HTMLMbNapmapMapElement;
+        new (): HTMLMbNapmapMapElement;
+    };
     interface HTMLElementTagNameMap {
         "mb-napmap-app": HTMLMbNapmapAppElement;
         "mb-napmap-editor": HTMLMbNapmapEditorElement;
         "mb-napmap-list": HTMLMbNapmapListElement;
+        "mb-napmap-map": HTMLMbNapmapMapElement;
     }
 }
 declare namespace LocalJSX {
@@ -93,6 +123,13 @@ declare namespace LocalJSX {
         "apiBase"?: string;
         "onStation-clicked"?: (event: MbNapmapListCustomEvent<string>) => void;
     }
+    interface MbNapmapMap {
+        "onStation-clicked"?: (event: MbNapmapMapCustomEvent<string>) => void;
+        /**
+          * @default []
+         */
+        "stations"?: Station[];
+    }
 
     interface MbNapmapAppAttributes {
         "basePath": string;
@@ -110,6 +147,7 @@ declare namespace LocalJSX {
         "mb-napmap-app": Omit<MbNapmapApp, keyof MbNapmapAppAttributes> & { [K in keyof MbNapmapApp & keyof MbNapmapAppAttributes]?: MbNapmapApp[K] } & { [K in keyof MbNapmapApp & keyof MbNapmapAppAttributes as `attr:${K}`]?: MbNapmapAppAttributes[K] } & { [K in keyof MbNapmapApp & keyof MbNapmapAppAttributes as `prop:${K}`]?: MbNapmapApp[K] };
         "mb-napmap-editor": Omit<MbNapmapEditor, keyof MbNapmapEditorAttributes> & { [K in keyof MbNapmapEditor & keyof MbNapmapEditorAttributes]?: MbNapmapEditor[K] } & { [K in keyof MbNapmapEditor & keyof MbNapmapEditorAttributes as `attr:${K}`]?: MbNapmapEditorAttributes[K] } & { [K in keyof MbNapmapEditor & keyof MbNapmapEditorAttributes as `prop:${K}`]?: MbNapmapEditor[K] };
         "mb-napmap-list": Omit<MbNapmapList, keyof MbNapmapListAttributes> & { [K in keyof MbNapmapList & keyof MbNapmapListAttributes]?: MbNapmapList[K] } & { [K in keyof MbNapmapList & keyof MbNapmapListAttributes as `attr:${K}`]?: MbNapmapListAttributes[K] } & { [K in keyof MbNapmapList & keyof MbNapmapListAttributes as `prop:${K}`]?: MbNapmapList[K] };
+        "mb-napmap-map": MbNapmapMap;
     }
 }
 export { LocalJSX as JSX };
@@ -119,6 +157,7 @@ declare module "@stencil/core" {
             "mb-napmap-app": LocalJSX.IntrinsicElements["mb-napmap-app"] & JSXBase.HTMLAttributes<HTMLMbNapmapAppElement>;
             "mb-napmap-editor": LocalJSX.IntrinsicElements["mb-napmap-editor"] & JSXBase.HTMLAttributes<HTMLMbNapmapEditorElement>;
             "mb-napmap-list": LocalJSX.IntrinsicElements["mb-napmap-list"] & JSXBase.HTMLAttributes<HTMLMbNapmapListElement>;
+            "mb-napmap-map": LocalJSX.IntrinsicElements["mb-napmap-map"] & JSXBase.HTMLAttributes<HTMLMbNapmapMapElement>;
         }
     }
 }

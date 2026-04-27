@@ -25,6 +25,7 @@
 graph TD;
   mb-napmap-app --> mb-napmap-editor
   mb-napmap-app --> mb-napmap-list
+  mb-napmap-list --> mb-napmap-map
   style mb-napmap-app fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
