@@ -13,38 +13,6 @@
         padding: 0;
         font-family: Roboto, sans-serif;
       }
-      .standalone-info {
-        max-width: 720px;
-        margin: 64px auto;
-        padding: 32px;
-        border: 1px solid #e0e0e0;
-        border-radius: 16px;
-        background: #f8f6ff;
-        box-shadow: 0 2px 12px rgba(94, 53, 177, 0.08);
-        line-height: 1.6;
-      }
-      .standalone-info h1 { margin: 0 0 16px; color: #5e35b1; font-weight: 500; }
-      .standalone-info p { margin: 12px 0; }
-      .standalone-info a {
-        color: #5e35b1;
-        font-weight: 500;
-        text-decoration: none;
-        border-bottom: 2px solid #b39ddb;
-      }
-      .standalone-info a:hover { border-bottom-color: #5e35b1; }
-      .standalone-info code {
-        background: #ede7f6;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: 'JetBrains Mono', Consolas, monospace;
-        font-size: 0.9em;
-      }
-      .standalone-info hr {
-        margin: 24px 0;
-        border: none;
-        border-top: 1px solid #d1c4e9;
-      }
-      .standalone-info small { color: #6c5894; }
     </style>
   </head>
   <body>
@@ -53,20 +21,10 @@
       (function () {
         var host = window.location.hostname;
         var isLocalDev = /^(localhost|127\.|::1|0\.0\.0\.0)$/.test(host) || host === '';
+        var apiBase = isLocalDev ? 'http://localhost:5001/api' : '/api';
         var root = document.getElementById('napmap-root');
-        if (isLocalDev) {
-          root.innerHTML = '<mb-napmap-app api-base="http://localhost:5001/api" base-path="/"></mb-napmap-app>';
-        } else {
-          root.innerHTML =
-            '<div class="standalone-info">' +
-            '<h1>NAPMap &mdash; Stanice alternatívnych palív</h1>' +
-            '<p>Toto je samostatné <strong>front-end</strong> nasadenie projektu na Azure App Service. Slúži ako ukážka, že build pipeline a kontajnerizovaná SPA fungujú v Azure prostredí.</p>' +
-            '<p>Plne funkčná aplikácia (s back-endom Go + Gin a databázou MongoDB) beží v zdielanom WAC FIIT klastri:</p>' +
-            '<p>&rarr; <a href="https://wac-hospital.westeurope.cloudapp.azure.com/fea/mb-napmap/list">Otvor NAPMap v WAC clustri</a></p>' +
-            '<hr>' +
-            '<p><small>Author: Maroš Bednár &middot; Image: <code>bednarmaros341/napmap-ufe</code> &middot; <a href="https://github.com/Marosko123/napmap-ufe">GitHub</a></small></p>' +
-            '</div>';
-        }
+        root.innerHTML =
+          '<mb-napmap-app api-base="' + apiBase + '" base-path="/"></mb-napmap-app>';
       })();
     </script>
   </body>
