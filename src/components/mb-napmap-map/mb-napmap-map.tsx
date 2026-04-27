@@ -20,16 +20,11 @@ export class MbNapmapMap {
   private mapEl?: HTMLDivElement;
   private map?: L.Map;
   private markersLayer?: L.LayerGroup;
+  private resizeObserver?: ResizeObserver;
+  private windowResize = () => this.map?.invalidateSize();
 
-  componentWillLoad() {
-    if (typeof document === 'undefined') return;
-    if (document.querySelector(`link[href="${LEAFLET_CSS_HREF}"]`)) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = LEAFLET_CSS_HREF;
-    link.integrity = LEAFLET_CSS_INTEGRITY;
-    link.crossOrigin = '';
-    document.head.appendChild(link);
+  async componentWillLoad() {
+    await this.ensureLeafletStylesheet();
   }
 
   componentDidLoad() {
@@ -49,9 +44,19 @@ export class MbNapmapMap {
 
     this.markersLayer = L.layerGroup().addTo(this.map);
     this.renderMarkers();
+
+    requestAnimationFrame(() => this.map?.invalidateSize());
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.map?.invalidateSize());
+      this.resizeObserver.observe(this.mapEl);
+    }
+    window.addEventListener('resize', this.windowResize);
   }
 
   disconnectedCallback() {
+    window.removeEventListener('resize', this.windowResize);
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = undefined;
     this.map?.remove();
     this.map = undefined;
     this.markersLayer = undefined;
@@ -90,6 +95,32 @@ export class MbNapmapMap {
     } else {
       this.map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
     }
+  }
+
+  private async ensureLeafletStylesheet(): Promise<void> {
+    if (typeof document === 'undefined') return;
+    const existing = document.querySelector(
+      `link[href="${LEAFLET_CSS_HREF}"]`,
+    ) as HTMLLinkElement | null;
+    if (existing) {
+      if (existing.sheet) return;
+      await new Promise<void>((resolve) => {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        existing.addEventListener('error', () => resolve(), { once: true });
+      });
+      return;
+    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = LEAFLET_CSS_HREF;
+    link.integrity = LEAFLET_CSS_INTEGRITY;
+    link.crossOrigin = '';
+    const loaded = new Promise<void>((resolve) => {
+      link.addEventListener('load', () => resolve(), { once: true });
+      link.addEventListener('error', () => resolve(), { once: true });
+    });
+    document.head.appendChild(link);
+    await loaded;
   }
 
   private escape(value: string | undefined): string {
