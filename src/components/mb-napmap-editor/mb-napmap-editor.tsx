@@ -99,8 +99,8 @@ export class MbNapmapEditor {
     let valid = true;
     for (let i = 0; i < this.formElement.children.length; i++) {
       const element = this.formElement.children[i];
-      if ("reportValidity" in element) {
-        valid = valid && (element as HTMLInputElement).reportValidity();
+      if ("checkValidity" in element) {
+        valid = valid && (element as HTMLInputElement).checkValidity();
       }
     }
     valid = valid && (this.station.fuels?.length ?? 0) >= 1;
