@@ -1,9 +1,8 @@
-import { Component, Event, EventEmitter, Host, Prop, Watch, h } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Host, Prop, Watch, h } from '@stencil/core';
 import L from 'leaflet';
 import { Station } from '../../api/napmap';
 
 const LEAFLET_CSS_HREF = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-const LEAFLET_CSS_INTEGRITY = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
 
 const DEFAULT_CENTER: [number, number] = [48.6690, 19.6990];
 const DEFAULT_ZOOM = 7;
@@ -14,6 +13,7 @@ const DEFAULT_ZOOM = 7;
   shadow: false,
 })
 export class MbNapmapMap {
+  @Element() hostElement!: HTMLElement;
   @Event({ eventName: 'station-clicked' }) stationClicked: EventEmitter<string>;
   @Prop() stations: Station[] = [];
 
@@ -99,8 +99,30 @@ export class MbNapmapMap {
 
   private async ensureLeafletStylesheet(): Promise<void> {
     if (typeof document === 'undefined') return;
-    const existing = document.querySelector(
-      `link[href="${LEAFLET_CSS_HREF}"]`,
+    const targets = this.styleTargets();
+    await Promise.all(targets.map((t) => this.injectInto(t)));
+  }
+
+  private styleTargets(): (Document | ShadowRoot)[] {
+    const seen = new Set<Document | ShadowRoot>();
+    const result: (Document | ShadowRoot)[] = [];
+    let node: Node | null = this.hostElement;
+    while (node) {
+      const root = node.getRootNode() as Document | ShadowRoot;
+      if (!seen.has(root)) {
+        seen.add(root);
+        result.push(root);
+      }
+      node = root instanceof ShadowRoot ? root.host : null;
+    }
+    return result;
+  }
+
+  private async injectInto(root: Document | ShadowRoot): Promise<void> {
+    const target: ParentNode =
+      root instanceof Document ? root.head : (root as ShadowRoot);
+    const existing = (target as ParentNode).querySelector(
+      `link[data-mb-leaflet][href="${LEAFLET_CSS_HREF}"]`,
     ) as HTMLLinkElement | null;
     if (existing) {
       if (existing.sheet) return;
@@ -113,13 +135,13 @@ export class MbNapmapMap {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = LEAFLET_CSS_HREF;
-    link.integrity = LEAFLET_CSS_INTEGRITY;
     link.crossOrigin = '';
+    link.setAttribute('data-mb-leaflet', '');
     const loaded = new Promise<void>((resolve) => {
       link.addEventListener('load', () => resolve(), { once: true });
       link.addEventListener('error', () => resolve(), { once: true });
     });
-    document.head.appendChild(link);
+    (target as Node).appendChild(link);
     await loaded;
   }
 
