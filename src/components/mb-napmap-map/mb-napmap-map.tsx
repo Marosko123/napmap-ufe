@@ -1,8 +1,6 @@
-import { Component, Element, Event, EventEmitter, Host, Prop, Watch, h } from '@stencil/core';
+import { Component, Element, Event, EventEmitter, Host, Prop, Watch, getAssetPath, h } from '@stencil/core';
 import L from 'leaflet';
 import { Station } from '../../api/napmap';
-
-const LEAFLET_CSS_HREF = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
 
 const DEFAULT_CENTER: [number, number] = [48.6690, 19.6990];
 const DEFAULT_ZOOM = 7;
@@ -11,6 +9,7 @@ const DEFAULT_ZOOM = 7;
   tag: 'mb-napmap-map',
   styleUrl: 'mb-napmap-map.css',
   shadow: false,
+  assetsDirs: ['assets'],
 })
 export class MbNapmapMap {
   @Element() hostElement!: HTMLElement;
@@ -32,9 +31,9 @@ export class MbNapmapMap {
 
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconRetinaUrl: getAssetPath('assets/leaflet/marker-icon-2x.png'),
+      iconUrl: getAssetPath('assets/leaflet/marker-icon.png'),
+      shadowUrl: getAssetPath('assets/leaflet/marker-shadow.png'),
     });
 
     this.map = L.map(this.mapEl).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
@@ -100,8 +99,9 @@ export class MbNapmapMap {
 
   private async ensureLeafletStylesheet(): Promise<void> {
     if (typeof document === 'undefined') return;
+    const href = getAssetPath('assets/leaflet/leaflet.css');
     const targets = this.styleTargets();
-    await Promise.all(targets.map((t) => this.injectInto(t)));
+    await Promise.all(targets.map((t) => this.injectInto(t, href)));
   }
 
   private styleTargets(): (Document | ShadowRoot)[] {
@@ -119,11 +119,11 @@ export class MbNapmapMap {
     return result;
   }
 
-  private async injectInto(root: Document | ShadowRoot): Promise<void> {
+  private async injectInto(root: Document | ShadowRoot, href: string): Promise<void> {
     const target: ParentNode =
       root instanceof Document ? root.head : (root as ShadowRoot);
     const existing = (target as ParentNode).querySelector(
-      `link[data-mb-leaflet][href="${LEAFLET_CSS_HREF}"]`,
+      `link[data-mb-leaflet][href="${href}"]`,
     ) as HTMLLinkElement | null;
     if (existing) {
       if (existing.sheet) return;
@@ -135,8 +135,7 @@ export class MbNapmapMap {
     }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = LEAFLET_CSS_HREF;
-    link.crossOrigin = '';
+    link.href = href;
     link.setAttribute('data-mb-leaflet', '');
     const loaded = new Promise<void>((resolve) => {
       link.addEventListener('load', () => resolve(), { once: true });
