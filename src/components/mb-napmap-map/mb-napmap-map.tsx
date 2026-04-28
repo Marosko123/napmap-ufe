@@ -46,10 +46,8 @@ export class MbNapmapMap {
     this.renderMarkers();
 
     requestAnimationFrame(() => this.map?.invalidateSize());
-    if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => this.map?.invalidateSize());
-      this.resizeObserver.observe(this.mapEl);
-    }
+    this.resizeObserver = new ResizeObserver(() => this.map?.invalidateSize());
+    this.resizeObserver.observe(this.mapEl);
     window.addEventListener('resize', this.windowResize);
   }
 
@@ -71,12 +69,13 @@ export class MbNapmapMap {
     if (!this.map || !this.markersLayer) return;
     this.markersLayer.clearLayers();
 
-    const validStations = (this.stations || []).filter(
+    // preskočiť stanice bez platných GPS súradníc
+    const withCoords = (this.stations || []).filter(
       s => Number.isFinite(s.lat) && Number.isFinite(s.lng)
     );
 
     const bounds: L.LatLngTuple[] = [];
-    for (const station of validStations) {
+    for (const station of withCoords) {
       const marker = L.marker([station.lat, station.lng]);
       const fuels = (station.fuels || []).join(', ');
       const power = station.maxPowerKw ? ` &middot; ${station.maxPowerKw} kW` : '';
