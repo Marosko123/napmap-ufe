@@ -1,7 +1,7 @@
 {
   "name": "napmap-ufe",
   "version": "1.1.4",
-  "description": "NAPMap - Micro-frontend for alternative fuel stations registry",
+  "description": "napmap ufe - mikrofrontend pre register staníc",
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
   "types": "dist/types/index.d.ts",
